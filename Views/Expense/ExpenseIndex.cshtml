@@ -1,0 +1,27 @@
+@model IEnumerable<MyMvcApp.Models.Expense>
+
+<h1>Expenses</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var expense in Model)
+        {
+            <tr>
+                <td>@expense.Description</td>
+                <td>@expense.Amount</td>
+                <td>@expense.Date.ToShortDateString()</td>
+                <td>@expense.CategoryId</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-controller="Expense" asp-action="Create">Add New Expense</a>

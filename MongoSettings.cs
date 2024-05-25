@@ -1,4 +1,4 @@
-namespace YourNamespace.Models
+namespace MyMvcApp.Models
 {
     public class MongoSettings
     {

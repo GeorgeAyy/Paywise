@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using YourNamespace.Models;
+using MyMvcApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
