@@ -2,7 +2,44 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="jumbotron text-center bg-light p-5">
+    <h1 class="display-4">Welcome to Paywise</h1>
+    <p class="lead">Your go-to solution for managing personal expenses and budgeting efficiently.</p>
+    <hr class="my-4">
+    <p>With Paywise, you can track your spending, manage categories, and make informed financial decisions.</p>
+    <a class="btn btn-primary btn-lg" href="@Url.Action("Register", "Account")" role="button">Get Started</a>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Track Expenses</h5>
+                    <p class="card-text">Easily log your daily expenses and keep an eye on your spending habits.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Categories</h5>
+                    <p class="card-text">Organize your expenses into categories to see where your money goes.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Generate Reports</h5>
+                    <p class="card-text">Generate detailed reports to analyze your financial health over time.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-5">
+    <h2>Why Choose Paywise?</h2>
+    <p>Paywise offers a comprehensive set of tools to help you manage your finances better. Whether you're tracking daily expenses or planning your budget, Paywise makes it easy and intuitive.</p>
 </div>
