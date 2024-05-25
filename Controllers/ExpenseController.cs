@@ -50,7 +50,7 @@ public class ExpenseController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         expense.UserId = userId;
         await _context.Expenses.InsertOneAsync(expense);
-        return RedirectToAction("Index");
+        return RedirectToAction("Add");
     }
 
     [HttpGet]
