@@ -1,0 +1,15 @@
+.container {
+  margin-top: 10% !important;
+}
+
+.input-group-text {
+  cursor: pointer;
+}
+/* signup.css */
+.alert.hidden {
+  display: none;
+}
+
+.alert.show {
+  display: block;
+}
