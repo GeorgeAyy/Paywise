@@ -7,9 +7,8 @@ namespace MyMvcApp.Data
     {
         private readonly IMongoDatabase _database;
 
-        public ApplicationDbContext(string connectionString, string databaseName)
+        public ApplicationDbContext(IMongoClient client, string databaseName)
         {
-            var client = new MongoClient(connectionString);
             _database = client.GetDatabase(databaseName);
         }
 

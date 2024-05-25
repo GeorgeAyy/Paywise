@@ -21,7 +21,8 @@ namespace MyMvcApp.Controllers
             return View(categories);
         }
 
-        public IActionResult Create()
+        [HttpGet]
+        public IActionResult Manage()
         {
             return View();
         }
