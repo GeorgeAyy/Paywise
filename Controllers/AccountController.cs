@@ -85,8 +85,8 @@ public class AccountController : Controller
 
         await _context.Users.InsertOneAsync(newUser);
         ViewBag.SuccessMessage = "User registered successfully";
+        return RedirectToAction("Login");
 
-        return View();
     }
 
     [HttpPost]
