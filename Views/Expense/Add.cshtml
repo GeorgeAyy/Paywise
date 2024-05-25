@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Add Expense";
+    var categories = ViewBag.Categories as IEnumerable<MyMvcApp.Models.Category>;
 }
 
 <div class="container mt-5">
@@ -10,18 +11,32 @@
                     <h3 class="text-center">Add Expense</h3>
                 </div>
                 <div class="card-body">
-                    <form action="/Expense/Add" method="post">
+                    <form id="expenseForm" action="/Expense/Add" method="post">
                         <div class="form-group mb-3">
                             <label for="description">Description</label>
                             <input type="text" class="form-control" id="description" name="description" />
+                            <div id="descriptionError" class="text-danger"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="amount">Amount</label>
                             <input type="number" step="0.01" class="form-control" id="amount" name="amount" />
+                            <div id="amountError" class="text-danger"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="date">Date</label>
                             <input type="date" class="form-control" id="date" name="date" />
+                            <div id="dateError" class="text-danger"></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="category">Category</label>
+                            <select class="form-control" id="category" name="CategoryId">
+                                <option value="">Select a category</option>
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <div id="categoryError" class="text-danger"></div>
                         </div>
                         <div class="form-group mb-3">
                             <input type="submit" value="Add Expense" class="btn btn-primary btn-block" />
@@ -32,3 +47,5 @@
         </div>
     </div>
 </div>
+
+<script src="~/js/validateExpense.js"></script>

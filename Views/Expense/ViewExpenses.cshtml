@@ -1,0 +1,74 @@
+@model IEnumerable<MyMvcApp.ViewModels.ExpenseViewModel>
+
+@{
+    ViewData["Title"] = "View Expenses";
+}
+
+<div class="container mt-5">
+    <h2>View Expenses</h2>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#filterModal">Filter Expenses</button>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in Model)
+            {
+                <tr>
+                    <td>@expense.Description</td>
+                    <td>@expense.Amount.ToString("C")</td>
+                    <td>@expense.Date.ToShortDateString()</td>
+                    <td>@expense.CategoryName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Filter Expenses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="filterForm" action="/Expense/ViewExpenses" method="get">
+                    <div class="form-group mb-3">
+                        <label for="minDate">From Date</label>
+                        <input type="date" class="form-control" id="minDate" name="minDate" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="maxDate">To Date</label>
+                        <input type="date" class="form-control" id="maxDate" name="maxDate" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="minAmount">Min Amount</label>
+                        <input type="number" step="0.01" class="form-control" id="minAmount" name="minAmount" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="maxAmount">Max Amount</label>
+                        <input type="number" step="0.01" class="form-control" id="maxAmount" name="maxAmount" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" name="categoryId">
+                            <option value="">All Categories</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

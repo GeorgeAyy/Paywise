@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using MyMvcApp.Data;
 using MyMvcApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +38,24 @@ builder.Services.AddSingleton(sp =>
     return client.GetDatabase(settings.DatabaseName);
 });
 
+// Register ApplicationDbContext
+builder.Services.AddSingleton<ApplicationDbContext>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+    return new ApplicationDbContext(client, settings.DatabaseName);
+});
+
+// Register IPasswordHasher<User>
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+
+// Configure authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; // Set the login path
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -51,6 +72,9 @@ app.UseRouting();
 
 // Use session middleware
 app.UseSession();
+
+// Use authentication
+app.UseAuthentication();
 
 app.UseAuthorization();
 

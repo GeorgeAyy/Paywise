@@ -1,7 +1,26 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+using MyMvcApp.Data;
+using MyMvcApp.Models;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 public class AccountController : Controller
 {
+    private readonly ApplicationDbContext _context;
+    private readonly IPasswordHasher<User> _passwordHasher;
+
+    public AccountController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
+    {
+        _context = context;
+        _passwordHasher = passwordHasher;
+    }
+
     [HttpGet]
     public IActionResult Login()
     {
@@ -14,30 +33,34 @@ public class AccountController : Controller
         return View();
     }
 
-
-
     [HttpPost]
-    public IActionResult Login(string username, string password)
+    public async Task<IActionResult> Login(string username, string password)
     {
-        // For simplicity, we'll use hardcoded values.
-        // Replace this with your actual user validation logic.
-        if (username == "admin" && password == "password")
+        var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
+        if (user != null && _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) == PasswordVerificationResult.Success)
         {
-            // Set session values
-            HttpContext.Session.SetString("UserName", username);
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.Username)
+        };
 
+            var claimsIdentity = new ClaimsIdentity(claims, "Login");
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+            HttpContext.Session.SetString("UserName", username);
             return RedirectToAction("Index", "Home");
         }
         else
         {
-            // Show an error message (improve this as needed)
             ViewBag.ErrorMessage = "Invalid username or password";
             return View();
         }
     }
 
     [HttpPost]
-    public IActionResult Register(string username, string email, string password, string confirmPassword)
+    public async Task<IActionResult> Register(string username, string email, string password, string confirmPassword)
     {
         if (password != confirmPassword)
         {
@@ -45,15 +68,22 @@ public class AccountController : Controller
             return View();
         }
 
-        // For simplicity, we'll use hardcoded validation and user creation.
-        // Replace this with your actual user creation logic, such as saving to a database.
-        if (username == "admin") // Dummy condition to simulate an existing user
+        var existingUser = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
+        if (existingUser != null)
         {
             ViewBag.ErrorMessage = "Username already exists";
             return View();
         }
 
-        // Simulate successful registration
+        var newUser = new User
+        {
+            Username = username,
+            Email = email
+        };
+
+        newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
+
+        await _context.Users.InsertOneAsync(newUser);
         ViewBag.SuccessMessage = "User registered successfully";
 
         return View();

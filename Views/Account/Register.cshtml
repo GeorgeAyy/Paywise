@@ -10,22 +10,32 @@
                     <h3 class="text-center">Sign Up</h3>
                 </div>
                 <div class="card-body">
-                    <form asp-controller="Account" asp-action="Register" method="post">
+                    <form asp-controller="Account" asp-action="Register" method="post" id="signUpForm">
                         <div class="form-group mb-3">
                             <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required />
+                            <input type="text" class="form-control" id="username" name="username" />
+                            <div id="usernameError" class="text-danger mt-2"></div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required />
+                            <input type="email" class="form-control" id="email" name="email" />
+                            <div id="emailError" class="text-danger mt-2"></div>
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 position-relative">
                             <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required />
+                            <input type="password" class="form-control" id="password" name="password" />
+                            <span class="position-absolute top-50 end-0 translate-middle-y me-3">
+                                <i class="fas fa-eye" id="togglePassword" style="cursor: pointer;"></i>
+                            </span>
+                            <div id="passwordError" class="text-danger mt-2"></div>
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 position-relative">
                             <label for="confirmPassword">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required />
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" />
+                            <span class="position-absolute top-50 end-0 translate-middle-y me-3">
+                                <i class="fas fa-eye" id="toggleConfirmPassword" style="cursor: pointer;"></i>
+                            </span>
+                            <div id="confirmPasswordError" class="text-danger mt-2"></div>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
                     </form>
@@ -34,3 +44,5 @@
         </div>
     </div>
 </div>
+
+<script src="~/js/signup.js"></script>

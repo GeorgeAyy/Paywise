@@ -1,41 +1,34 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 using MyMvcApp.Data;
 using MyMvcApp.Models;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace MyMvcApp.Controllers
+[Authorize]
+public class CategoryController : Controller
 {
-    public class CategoryController : Controller
+    private readonly ApplicationDbContext _context;
+
+    public CategoryController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public CategoryController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+    [HttpGet]
+    public async Task<IActionResult> Manage()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var categories = await _context.GetCategoriesForUserAsync(userId);
+        return View(categories);
+    }
 
-        public async Task<IActionResult> Index()
-        {
-            var categories = await _context.Categories.Find(_ => true).ToListAsync();
-            return View(categories);
-        }
-
-        [HttpGet]
-        public IActionResult Manage()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create(Category category)
-        {
-            if (ModelState.IsValid)
-            {
-                await _context.Categories.InsertOneAsync(category);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(category);
-        }
+    [HttpPost]
+    public async Task<IActionResult> Add(Category category)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        category.UserId = userId;
+        await _context.Categories.InsertOneAsync(category);
+        return RedirectToAction("Manage");
     }
 }

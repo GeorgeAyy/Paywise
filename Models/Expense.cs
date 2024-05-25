@@ -1,4 +1,3 @@
-using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -20,6 +19,10 @@ namespace MyMvcApp.Models
         public DateTime Date { get; set; }
 
         [BsonElement("CategoryId")]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string CategoryId { get; set; }
+
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId { get; set; } // Reference to the user
     }
 }
