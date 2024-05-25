@@ -54,11 +54,16 @@ public class ExpenseController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> ViewExpenses(DateTime? minDate, DateTime? maxDate, decimal? minAmount, decimal? maxAmount, string categoryId)
+    public async Task<IActionResult> ViewExpenses(int page = 1, int pageSize = 10, DateTime? minDate = null, DateTime? maxDate = null, decimal? minAmount = null, decimal? maxAmount = null, string categoryId = null)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var expenses = await _context.GetExpensesForUserAsync(userId);
-        var categories = await _context.GetCategoriesForUserAsync(userId);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var expenses = await _context.GetExpensesForUserAsync(userId) ?? new List<Expense>();
+        var categories = await _context.GetCategoriesForUserAsync(userId) ?? new List<Category>();
 
         if (minDate.HasValue)
         {
@@ -94,8 +99,12 @@ public class ExpenseController : Controller
             CategoryName = categories.FirstOrDefault(c => c.Id == expense.CategoryId)?.Name
         }).ToList();
 
-        ViewBag.Categories = categories;
+        var paginatedExpenses = expenseViewModels.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-        return View(expenseViewModels);
+        ViewBag.Categories = categories;
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling(expenseViewModels.Count / (double)pageSize);
+
+        return View(paginatedExpenses);
     }
 }

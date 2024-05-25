@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "View Expenses";
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
 }
 
 <div class="container mt-5">
@@ -28,6 +30,52 @@
             }
         </tbody>
     </table>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @if (currentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("ViewExpenses", new { page = currentPage - 1 })">Previous</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+            }
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                if (i == currentPage)
+                {
+                    <li class="page-item active">
+                        <span class="page-link">@i</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("ViewExpenses", new { page = i })">@i</a>
+                    </li>
+                }
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("ViewExpenses", new { page = currentPage + 1 })">Next</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            }
+        </ul>
+    </nav>
 </div>
 
 <!-- Filter Modal -->
