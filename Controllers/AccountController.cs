@@ -13,12 +13,18 @@ using System.Threading.Tasks;
 public class AccountController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMongoCollection<User> _users;
+     private readonly IMongoCollection<Expense> _expenses;
     private readonly IPasswordHasher<User> _passwordHasher;
 
-    public AccountController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
+    public AccountController(IMongoClient client,ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
     {
+        var database = client.GetDatabase("Paywise"); 
+        _users = database.GetCollection<User>("Users");
+        _expenses = database.GetCollection<Expense>("Expenses");
         _context = context;
         _passwordHasher = passwordHasher;
+
     }
 
     [HttpGet]
@@ -96,4 +102,21 @@ public class AccountController : Controller
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
+
+
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            var expenses = await _expenses.Find(e => e.UserId == userId).ToListAsync();
+
+            var profileViewModel = new ProfileView
+            {
+                Username = user.Username,
+                Email = user.Email,
+                Expenses = expenses
+            };
+
+            return View(profileViewModel);
+        }
 }

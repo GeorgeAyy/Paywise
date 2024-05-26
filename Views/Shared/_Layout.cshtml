@@ -28,6 +28,9 @@
                         </li>
                         @if (User.Identity.IsAuthenticated)
                         {
+                              <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Profile">Profile</a>
+                              </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="expenseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Expense
@@ -38,6 +41,15 @@
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Expense" asp-action="ViewExpenses">View Expenses</a></li>
                                 </ul>
                             </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="reportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Report
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="ReportDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="Generate">Generate Report</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Report" asp-action="View">View Report</a></li>
+                                </ul>
+                            </li> 
                         }
                     </ul>
                     <ul class="navbar-nav ms-auto">

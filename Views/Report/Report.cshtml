@@ -1,0 +1,24 @@
+@model MyMvcApp.Models.Report
+
+<h2>Expense Report</h2>
+<p>Report for the period: @Model.StartDate.ToShortDateString() to @Model.EndDate.ToShortDateString()</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var expense in Model.Expenses)
+        {
+            <tr>
+                <td>@expense.Description</td>
+                <td>@expense.Amount</td>
+                <td>@expense.Date.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>

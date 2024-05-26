@@ -1,0 +1,26 @@
+@model MyMvcApp.Models.ProfileView
+
+<h2>Profile</h2>
+<p><strong>Username:</strong> @Model.Username</p>
+<p><strong>Email:</strong> @Model.Email</p>
+
+<h3>Expenses</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var expense in Model.Expenses)
+        {
+            <tr>
+                <td>@expense.Description</td>
+                <td>@expense.Amount</td>
+                <td>@expense.Date.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>

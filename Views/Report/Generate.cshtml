@@ -1,0 +1,14 @@
+@model MyMvcApp.Models.Report
+
+<h2>Generate Report</h2>
+<form asp-action="GenerateReport" method="post">
+    <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <input type="date" class="form-control" id="startDate" name="startDate" required />
+    </div>
+    <div class="form-group">
+        <label for="endDate">End Date</label>
+        <input type="date" class="form-control" id="endDate" name="endDate" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Generate Report</button>
+</form>
