@@ -53,6 +53,8 @@ builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ICategoryService, CategoryService>();
 builder.Services.AddSingleton<IExpenseService, ExpenseService>();
 builder.Services.AddSingleton<IReportService, ReportService>();
+// Register the ServiceFactory
+builder.Services.AddSingleton<IServiceFactory, ServiceFactory>();
 
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
