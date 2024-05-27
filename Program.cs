@@ -55,6 +55,13 @@ builder.Services.AddSingleton<IExpenseService, ExpenseService>();
 builder.Services.AddSingleton<IReportService, ReportService>();
 // Register the ServiceFactory
 builder.Services.AddSingleton<IServiceFactory, ServiceFactory>();
+// Add the simple logging library and its adapter
+builder.Services.AddSingleton<SimpleLoggingLibrary>();
+builder.Services.AddSingleton<IAppLogger, SimpleLoggingLibraryAdapter>(sp =>
+{
+    var simpleLoggingLibrary = sp.GetRequiredService<SimpleLoggingLibrary>();
+    return new SimpleLoggingLibraryAdapter(simpleLoggingLibrary);
+});
 
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
