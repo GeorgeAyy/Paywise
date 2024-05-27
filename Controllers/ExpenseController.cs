@@ -1,28 +1,31 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using MyMvcApp.Data;
+using MyMvcApp.Services;
 using MyMvcApp.Models;
-using MyMvcApp.ViewModels;
+using System;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using MyMvcApp.ViewModels;
 
 [Authorize]
 public class ExpenseController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IExpenseService _expenseService;
+    private readonly ICategoryService _categoryService;
 
-    public ExpenseController(ApplicationDbContext context)
+    public ExpenseController(IExpenseService expenseService, ICategoryService categoryService)
     {
-        _context = context;
+        _expenseService = expenseService;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var expenses = await _context.GetExpensesForUserAsync(userId);
-        var categories = await _context.GetCategoriesForUserAsync(userId);
-
+        var expenses = await _expenseService.GetExpensesForUserAsync(userId);
+        var categories = await _categoryService.GetCategoriesForUserAsync(userId);
         var expenseViewModels = expenses.Select(expense => new ExpenseViewModel
         {
             Id = expense.Id,
@@ -31,7 +34,6 @@ public class ExpenseController : Controller
             Date = expense.Date,
             CategoryName = categories.FirstOrDefault(c => c.Id == expense.CategoryId)?.Name
         }).ToList();
-
         return View(expenseViewModels);
     }
 
@@ -39,7 +41,7 @@ public class ExpenseController : Controller
     public async Task<IActionResult> Add()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var categories = await _context.GetCategoriesForUserAsync(userId);
+        var categories = await _categoryService.GetCategoriesForUserAsync(userId);
         ViewBag.Categories = categories;
         return View();
     }
@@ -49,7 +51,7 @@ public class ExpenseController : Controller
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         expense.UserId = userId;
-        await _context.Expenses.InsertOneAsync(expense);
+        await _expenseService.AddExpenseAsync(expense);
         return RedirectToAction("Add");
     }
 
@@ -62,49 +64,12 @@ public class ExpenseController : Controller
             return Unauthorized();
         }
 
-        var expenses = await _context.GetExpensesForUserAsync(userId) ?? new List<Expense>();
-        var categories = await _context.GetCategoriesForUserAsync(userId) ?? new List<Category>();
-
-        if (minDate.HasValue)
-        {
-            expenses = expenses.Where(e => e.Date >= minDate.Value).ToList();
-        }
-
-        if (maxDate.HasValue)
-        {
-            expenses = expenses.Where(e => e.Date <= maxDate.Value).ToList();
-        }
-
-        if (minAmount.HasValue)
-        {
-            expenses = expenses.Where(e => e.Amount >= minAmount.Value).ToList();
-        }
-
-        if (maxAmount.HasValue)
-        {
-            expenses = expenses.Where(e => e.Amount <= maxAmount.Value).ToList();
-        }
-
-        if (!string.IsNullOrEmpty(categoryId))
-        {
-            expenses = expenses.Where(e => e.CategoryId == categoryId).ToList();
-        }
-
-        var expenseViewModels = expenses.Select(expense => new ExpenseViewModel
-        {
-            Id = expense.Id,
-            Description = expense.Description,
-            Amount = expense.Amount,
-            Date = expense.Date,
-            CategoryName = categories.FirstOrDefault(c => c.Id == expense.CategoryId)?.Name
-        }).ToList();
-
+        var expenseViewModels = await _expenseService.GetFilteredExpensesAsync(userId, minDate, maxDate, minAmount, maxAmount, categoryId);
         var paginatedExpenses = expenseViewModels.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-        ViewBag.Categories = categories;
+        ViewBag.Categories = await _categoryService.GetCategoriesForUserAsync(userId);
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling(expenseViewModels.Count / (double)pageSize);
-
         return View(paginatedExpenses);
     }
 }

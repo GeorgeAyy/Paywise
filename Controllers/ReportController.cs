@@ -1,21 +1,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+using MyMvcApp.Services;
 using MyMvcApp.Models;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace YourNamespace.Controllers
+namespace MyMvcApp.Controllers
 {
     [Authorize]
     public class ReportController : Controller
     {
-        private readonly IMongoCollection<Expense> _expenses;
+        private readonly IReportService _reportService;
 
-        public ReportController(IMongoClient client)
+        public ReportController(IReportService reportService)
         {
-            var database = client.GetDatabase("Paywise");
-            _expenses = database.GetCollection<Expense>("Expenses");
+            _reportService = reportService;
         }
 
         public IActionResult Generate()
@@ -27,15 +27,13 @@ namespace YourNamespace.Controllers
         public async Task<IActionResult> GenerateReport(DateTime startDate, DateTime endDate)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var expenses = await _expenses.Find(e => e.UserId == userId && e.Date >= startDate && e.Date <= endDate).ToListAsync();
-
+            var expenses = await _reportService.GenerateReportAsync(userId, startDate, endDate);
             var reportViewModel = new Report
             {
                 StartDate = startDate,
                 EndDate = endDate,
                 Expenses = expenses
             };
-
             return View("Report", reportViewModel);
         }
     }

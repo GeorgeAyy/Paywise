@@ -50,6 +50,9 @@ builder.Services.AddSingleton<ApplicationDbContext>(sp =>
 // Register IPasswordHasher<User>
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<ICategoryService, CategoryService>();
+builder.Services.AddSingleton<IExpenseService, ExpenseService>();
+builder.Services.AddSingleton<IReportService, ReportService>();
 
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
