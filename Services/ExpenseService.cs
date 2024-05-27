@@ -59,5 +59,12 @@ namespace MyMvcApp.Services
                 CategoryName = categories.FirstOrDefault(c => c.Id == expense.CategoryId)?.Name
             }).ToList();
         }
+    
+    public async Task DeleteExpenseAsync(string id) // Implement this method
+        {
+            await _expenses.DeleteOneAsync(expense => expense.Id == id);
+        }
+    
     }
+    
 }

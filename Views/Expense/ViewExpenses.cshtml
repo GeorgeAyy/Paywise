@@ -16,6 +16,7 @@
                 <th>Amount</th>
                 <th>Date</th>
                 <th>Category</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +27,13 @@
                     <td>@expense.Amount.ToString("C")</td>
                     <td>@expense.Date.ToShortDateString()</td>
                     <td>@expense.CategoryName</td>
+                     <td>
+                        <!-- Delete Form -->
+                        <form asp-action="DeleteExpense" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@expense.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this expense?');">Delete</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </tbody>

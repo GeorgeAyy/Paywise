@@ -79,4 +79,22 @@ public class ExpenseController : Controller
         ViewBag.TotalPages = (int)Math.Ceiling(expenseViewModels.Count / (double)pageSize);
         return View(paginatedExpenses);
     }
+
+      [HttpPost]
+    public async Task<IActionResult> DeleteExpense(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(id))
+        {
+            _logger.LogError("DeleteExpense called with null or empty ID.");
+            return BadRequest();
+        }
+
+        await _expenseService.DeleteExpenseAsync(id);
+        _logger.LogInfo($"Expense with ID: {id} deleted by user ID: {userId}");
+
+        return RedirectToAction("ViewExpenses");
+    }
+
+    
 }
