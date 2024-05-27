@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using MyMvcApp.Data;
+using MyMvcApp.Services;
 using MyMvcApp.Models;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -12,19 +11,11 @@ using System.Threading.Tasks;
 
 public class AccountController : Controller
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IMongoCollection<User> _users;
-     private readonly IMongoCollection<Expense> _expenses;
-    private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IUserService _userService;
 
-    public AccountController(IMongoClient client,ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
+    public AccountController(IUserService userService)
     {
-        var database = client.GetDatabase("Paywise"); 
-        _users = database.GetCollection<User>("Users");
-        _expenses = database.GetCollection<Expense>("Expenses");
-        _context = context;
-        _passwordHasher = passwordHasher;
-
+        _userService = userService;
     }
 
     [HttpGet]
@@ -42,14 +33,14 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(string username, string password)
     {
-        var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
-        if (user != null && _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) == PasswordVerificationResult.Success)
+        var user = await _userService.ValidateUserCredentials(username, password);
+        if (user != null)
         {
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.Username)
-        };
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.Username)
+            };
 
             var claimsIdentity = new ClaimsIdentity(claims, "Login");
 
@@ -74,7 +65,7 @@ public class AccountController : Controller
             return View();
         }
 
-        var existingUser = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
+        var existingUser = await _userService.FindByUsernameAsync(username);
         if (existingUser != null)
         {
             ViewBag.ErrorMessage = "Username already exists";
@@ -87,12 +78,9 @@ public class AccountController : Controller
             Email = email
         };
 
-        newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
-
-        await _context.Users.InsertOneAsync(newUser);
+        await _userService.RegisterUserAsync(newUser, password);
         ViewBag.SuccessMessage = "User registered successfully";
         return RedirectToAction("Login");
-
     }
 
     [HttpPost]
@@ -103,18 +91,16 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-
-   [HttpGet]
+    [HttpGet]
     public async Task<IActionResult> Profile()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
-        var expenses = await _expenses.Find(e => e.UserId == userId).ToListAsync();
+        var user = await _userService.GetUserByIdAsync(userId);
+        var expenses = await _userService.GetUserExpensesAsync(userId);
 
         ViewBag.User = user;
         ViewBag.Expenses = expenses;
 
         return View();
     }
-
 }
