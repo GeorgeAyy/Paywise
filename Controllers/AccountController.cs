@@ -104,19 +104,17 @@ public class AccountController : Controller
     }
 
 
-        public async Task<IActionResult> Profile()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
-            var expenses = await _expenses.Find(e => e.UserId == userId).ToListAsync();
+   [HttpGet]
+    public async Task<IActionResult> Profile()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        var expenses = await _expenses.Find(e => e.UserId == userId).ToListAsync();
 
-            var profileViewModel = new ProfileView
-            {
-                Username = user.Username,
-                Email = user.Email,
-                Expenses = expenses
-            };
+        ViewBag.User = user;
+        ViewBag.Expenses = expenses;
 
-            return View(profileViewModel);
-        }
+        return View();
+    }
+
 }

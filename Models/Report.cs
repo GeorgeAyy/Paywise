@@ -1,5 +1,4 @@
 
-
 namespace MyMvcApp.Models
 {
     public class Report

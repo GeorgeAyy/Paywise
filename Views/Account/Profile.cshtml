@@ -1,8 +1,12 @@
-@model MyMvcApp.Models.ProfileView
+@{
+    var user = ViewBag.User as MyMvcApp.Models.User;
+    var expenses = ViewBag.Expenses as List<MyMvcApp.Models.Expense>;
+}
 
-<h2>Profile</h2>
-<p><strong>Username:</strong> @Model.Username</p>
-<p><strong>Email:</strong> @Model.Email</p>
+<h2>User Profile</h2>
+
+<p>Username: @user.Username</p>
+<p>Email: @user.Email</p>
 
 <h3>Expenses</h3>
 <table class="table">
@@ -14,7 +18,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var expense in Model.Expenses)
+        @foreach (var expense in expenses)
         {
             <tr>
                 <td>@expense.Description</td>
@@ -24,3 +28,40 @@
         }
     </tbody>
 </table>
+
+<h3>Expenses Chart</h3>
+<canvas id="expensesChart" width="400" height="200"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('expensesChart').getContext('2d');
+
+        // Extract labels (dates) and data (amounts) from expenses
+        var labels = @Html.Raw(Json.Serialize(expenses.Select(e => e.Date.ToShortDateString())));
+        var data = @Html.Raw(Json.Serialize(expenses.Select(e => e.Amount)));
+
+        var chart = new Chart(ctx, {
+            type: 'line', // You can change the type of chart here (e.g., 'bar', 'pie')
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Expenses',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)', // Background color
+                    borderColor: 'rgba(75, 192, 192, 1)', // Border color
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+}
