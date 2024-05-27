@@ -13,17 +13,20 @@ public class ExpenseController : Controller
 {
     private readonly IExpenseService _expenseService;
     private readonly ICategoryService _categoryService;
+    private readonly IAppLogger _logger;
 
-    public ExpenseController(IExpenseService expenseService, ICategoryService categoryService)
+    public ExpenseController(IExpenseService expenseService, ICategoryService categoryService, IAppLogger logger)
     {
         _expenseService = expenseService;
         _categoryService = categoryService;
+        _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        _logger.LogInfo($"Expenses index page requested by user ID: {userId}");
         var expenses = await _expenseService.GetExpensesForUserAsync(userId);
         var categories = await _categoryService.GetCategoriesForUserAsync(userId);
         var expenseViewModels = expenses.Select(expense => new ExpenseViewModel
@@ -41,6 +44,7 @@ public class ExpenseController : Controller
     public async Task<IActionResult> Add()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        _logger.LogInfo($"Add expense page requested by user ID: {userId}");
         var categories = await _categoryService.GetCategoriesForUserAsync(userId);
         ViewBag.Categories = categories;
         return View();
@@ -52,6 +56,7 @@ public class ExpenseController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         expense.UserId = userId;
         await _expenseService.AddExpenseAsync(expense);
+        _logger.LogInfo($"Expense added for user ID: {userId}");
         return RedirectToAction("Add");
     }
 
@@ -61,9 +66,11 @@ public class ExpenseController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
+            _logger.LogError("Unauthorized access attempt to view expenses.");
             return Unauthorized();
         }
 
+        _logger.LogInfo($"View expenses page requested by user ID: {userId}");
         var expenseViewModels = await _expenseService.GetFilteredExpensesAsync(userId, minDate, maxDate, minAmount, maxAmount, categoryId);
         var paginatedExpenses = expenseViewModels.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 

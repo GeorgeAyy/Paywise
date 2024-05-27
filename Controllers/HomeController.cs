@@ -5,51 +5,57 @@ using MongoDB.Bson;
 using MyMvcApp.Models;
 using MyMvcApp.Services;
 
-namespace MyMvcApp.Controllers;
-
-public class HomeController : Controller
+namespace MyMvcApp.Controllers
 {
-    private readonly IServiceFactory _serviceFactory;
-
-    public HomeController(IServiceFactory serviceFactory)
+    public class HomeController : Controller
     {
-        _serviceFactory = serviceFactory;
-    }
+        private readonly IServiceFactory _serviceFactory;
+        private readonly IAppLogger _logger;
 
-    public async Task<IActionResult> Index()
-    {
-        // Retrieve the authenticated user's ID from the claims
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // Ensure the userId is a valid ObjectId
-        if (!ObjectId.TryParse(userId, out var objectId))
+        public HomeController(IServiceFactory serviceFactory, IAppLogger logger)
         {
-            // Handle the case where the userId is not a valid ObjectId
-            return BadRequest("Invalid user ID format.");
+            _serviceFactory = serviceFactory;
+            _logger = logger;
         }
 
-        var categoryService = _serviceFactory.CreateService<ICategoryService>();
-        var expenseService = _serviceFactory.CreateService<IExpenseService>();
+        public async Task<IActionResult> Index()
+        {
+            // Retrieve the authenticated user's ID from the claims
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInfo($"Home page requested by user ID: {userId}");
 
-        // Example usage of the services with the validated userId
-        var categories = await categoryService.GetCategoriesForUserAsync(userId);
-        var expenses = await expenseService.GetExpensesForUserAsync(userId);
+            // Ensure the userId is a valid ObjectId
+            if (!ObjectId.TryParse(userId, out var objectId))
+            {
+                _logger.LogError($"Invalid user ID format: {userId}");
+                // Handle the case where the userId is not a valid ObjectId
+                return BadRequest("Invalid user ID format.");
+            }
 
-        ViewBag.Categories = categories;
-        ViewBag.Expenses = expenses;
+            var categoryService = _serviceFactory.CreateService<ICategoryService>();
+            var expenseService = _serviceFactory.CreateService<IExpenseService>();
 
-        return View();
-    }
+            // Example usage of the services with the validated userId
+            var categories = await categoryService.GetCategoriesForUserAsync(userId);
+            var expenses = await expenseService.GetExpensesForUserAsync(userId);
 
+            ViewBag.Categories = categories;
+            ViewBag.Expenses = expenses;
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+            return View();
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        public IActionResult Privacy()
+        {
+            _logger.LogInfo("Privacy page requested.");
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            _logger.LogError("Error page requested.");
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
     }
 }
