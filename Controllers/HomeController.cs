@@ -24,13 +24,6 @@ namespace MyMvcApp.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             _logger.LogInfo($"Home page requested by user ID: {userId}");
 
-            // Ensure the userId is a valid ObjectId
-            if (!ObjectId.TryParse(userId, out var objectId))
-            {
-                _logger.LogError($"Invalid user ID format: {userId}");
-                // Handle the case where the userId is not a valid ObjectId
-                return BadRequest("Invalid user ID format.");
-            }
 
             var categoryService = _serviceFactory.CreateService<ICategoryService>();
             var expenseService = _serviceFactory.CreateService<IExpenseService>();
